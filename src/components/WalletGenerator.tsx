@@ -33,11 +33,6 @@ interface Wallet {
   privateKey: string;
   publicKey: string;
 }
-
-console.log("BIP39 library loaded:", !!generateMnemonic);
-console.log("Solana web3 loaded:", !!Keypair);
-console.log("ethers loaded:", !!ethers);
-
 const GenerateWallet = () => {
   const [refresh, setRefresh] = useState(false);
   const [mnemonicWords, setMnemonicWords] = useState<string[]>([]);
@@ -118,11 +113,10 @@ const GenerateWallet = () => {
       const seedBuffer = mnemonicToSeedSync(mnemonic);
       console.log("Seed buffer created successfully", seedBuffer.length);
   
-      // Use hardened path for Solana (501), normal for Ethereum (60)
       const path =
         pathType === "501"
-          ? `m/44'/${pathType}'/0'/${accountIndex}'` // Solana: all hardened
-          : `m/44'/${pathType}'/0'/${accountIndex}`; // Ethereum: last not hardened
+          ? `m/44'/${pathType}'/0'/${accountIndex}'` 
+          : `m/44'/${pathType}'/0'/${accountIndex}'`; 
   
       console.log("Deriving path", path);
   

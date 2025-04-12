@@ -11,7 +11,7 @@ export default function Navbar() {
                 <a aria-current="page" className="flex items-center" href="/">
                   <div className="flex items-center gap-4">
                     <img
-                      src="./src/assets/blockchain.svg"
+                      src="/blockchain.svg"
                       alt="Blockchain Logo"
                       className="h-8 w-8 transition duration-300 dark:invert"
                     />
