@@ -1,1 +1,6 @@
 @import "tailwindcss";
+@layer utilities {
+    .dark\:invert {
+      filter: invert(1);
+    }
+  }

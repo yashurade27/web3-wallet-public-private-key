@@ -1,6 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export default function Navbar() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    const isDark = storedTheme === "dark" || (!storedTheme && prefersDark);
+    setIsDarkMode(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
+  }, []);
+
   return (
     <div>
       <header className="fixed inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-6 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg dark:bg-gray-900/80 dark:border-gray-700">
@@ -13,7 +24,7 @@ export default function Navbar() {
                     <img
                       src="/blockchain.svg"
                       alt="Blockchain Logo"
-                      className="h-8 w-8 transition duration-300 dark:invert"
+                      className={`h-8 w-8 transition duration-300 ${isDarkMode ? 'invert' : ''}`}
                     />
                     <h1 className="text-2xl font-mono text-gray-900 dark:text-white">
                       Zer0Vault
@@ -33,7 +44,7 @@ export default function Navbar() {
                 </a>
               </div>
               <div className="flex items-center gap-3">
-                <Toggle />
+                <Toggle setIsDarkMode={setIsDarkMode} />
               </div>
             </div>
           </div>
@@ -43,45 +54,30 @@ export default function Navbar() {
   );
 }
 
-export function Toggle() {
-  const [modeLabel, setModeLabel] = React.useState("Dark Mode");
+export function Toggle({ setIsDarkMode }: { setIsDarkMode: React.Dispatch<React.SetStateAction<boolean>> }) {
+  const [modeLabel, setModeLabel] = useState("Dark Mode");
 
   function toggleDarkMode(event: React.ChangeEvent<HTMLInputElement>) {
     const isDark = event.target.checked;
-
-    const toggleTrack = event.target.nextElementSibling as HTMLElement;
-    const toggleDot = toggleTrack?.nextElementSibling as HTMLElement;
+    document.documentElement.classList.toggle("dark", isDark);
 
     if (isDark) {
-      document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
       setModeLabel("Light Mode");
     } else {
-      document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
       setModeLabel("Dark Mode");
     }
 
-    // Optional styling transitions
-    toggleTrack?.classList.toggle("bg-blue-500", isDark);
-    toggleTrack?.classList.toggle("shadow-neumorphic-toggle-inset", isDark);
-    toggleTrack?.classList.toggle("shadow-neumorphic-toggle-outset", !isDark);
-    toggleDot?.classList.toggle("translate-x-6", isDark);
+    setIsDarkMode(isDark);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
     const isDark = storedTheme === "dark" || (!storedTheme && prefersDark);
-    document.documentElement.classList.toggle("dark", isDark);
-
-    // Set toggle state and label
-    const checkbox = document.getElementById("toggle") as HTMLInputElement;
-    if (checkbox) checkbox.checked = isDark;
-
+    setIsDarkMode(isDark);
     setModeLabel(isDark ? "Light Mode" : "Dark Mode");
   }, []);
 
