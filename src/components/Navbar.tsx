@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Moon, Sun } from "lucide-react";
+import { Button } from "./ui/button";
 
-export default function Navbar() {
+export default function Navbar({ isAirdrop }: { isAirdrop: (value: boolean) => void }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
-
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
 
     const isDark = storedTheme === "dark" || (!storedTheme && prefersDark);
     setIsDarkMode(isDark);
@@ -24,25 +29,43 @@ export default function Navbar() {
                     <img
                       src="/blockchain.svg"
                       alt="Blockchain Logo"
-                      className={`h-8 w-8 transition duration-300 ${isDarkMode ? 'invert' : ''}`}
+                      className={`h-8 w-8 transition duration-300 ${
+                        isDarkMode ? "invert" : ""
+                      }`}
                     />
                     <h1 className="text-2xl font-mono text-gray-900 dark:text-white">
                       Zer0Vault
                     </h1>
+                    <div>
+                      <Badge
+                        className="text-xs font-mono text-gray-900 dark:text-white rounded-full"
+                        variant="outline"
+                      >
+                        v1.1
+                      </Badge>
+                    </div>
                   </div>
                   <p className="sr-only">Website Title</p>
                 </a>
               </div>
-              <div className="hidden md:flex md:items-center md:gap-5">
-                <a
-                  className="rounded-lg px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-black dark:text-gray-200 dark:hover:bg-gray-800"
-                  href="https://solana.com/developers/courses/intro-to-solana/intro-to-cryptography"
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <div>
+                <Button
+                  id="airdrop-button"
+                  onClick={() => {
+                    isAirdrop(true)
+                  }}
+                  variant="ghost"
+                  className="tracking-tight rounded-lg px-3 py-1.5 text-base font-semibold text-gray-700 dark:text-gray-200
+               hover:bg-gray-100 dark:hover:bg-gray-800
+               focus:outline-none focus:ring-0 border-none shadow-none gap-1 transition-colors"
                 >
-                  How it works
-                </a>
+                  Devnet Faucet
+                  <Badge variant="default" className="ml-1 rounded-2xl">
+                    New
+                  </Badge>
+                </Button>
               </div>
+
               <div className="flex items-center gap-3">
                 <Toggle setIsDarkMode={setIsDarkMode} />
               </div>
@@ -54,14 +77,18 @@ export default function Navbar() {
   );
 }
 
-export function Toggle({ setIsDarkMode }: { setIsDarkMode: React.Dispatch<React.SetStateAction<boolean>> }) {
+export function Toggle({
+  setIsDarkMode,
+}: {
+  setIsDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const [isDark, setIsDark] = useState(false);
   const [modeLabel, setModeLabel] = useState("Dark Mode");
 
-  function toggleDarkMode(event: React.ChangeEvent<HTMLInputElement>) {
-    const isDark = event.target.checked;
-    document.documentElement.classList.toggle("dark", isDark);
+  function toggleDarkMode(checked: boolean) {
+    document.documentElement.classList.toggle("dark", checked);
 
-    if (isDark) {
+    if (checked) {
       localStorage.setItem("theme", "dark");
       setModeLabel("Light Mode");
     } else {
@@ -69,33 +96,34 @@ export function Toggle({ setIsDarkMode }: { setIsDarkMode: React.Dispatch<React.
       setModeLabel("Dark Mode");
     }
 
-    setIsDarkMode(isDark);
+    setIsDarkMode(checked);
+    setIsDark(checked);
   }
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
 
-    const isDark = storedTheme === "dark" || (!storedTheme && prefersDark);
-    setIsDarkMode(isDark);
-    setModeLabel(isDark ? "Light Mode" : "Dark Mode");
+    const isDarkPreferred =
+      storedTheme === "dark" || (!storedTheme && prefersDark);
+    document.documentElement.classList.toggle("dark", isDarkPreferred);
+    setIsDarkMode(isDarkPreferred);
+    setIsDark(isDarkPreferred);
+    setModeLabel(isDarkPreferred ? "Light Mode" : "Dark Mode");
   }, []);
 
   return (
-    <div className="flex items-center">
-      <span className="mr-3 text-gray-600 dark:text-white">{modeLabel}</span>
-      <label className="flex items-center cursor-pointer">
-        <div className="relative">
-          <input
-            type="checkbox"
-            id="toggle"
-            className="sr-only"
-            onChange={toggleDarkMode}
-          />
-          <div className="w-12 h-6 bg-gray-300 rounded-full shadow-neumorphic-toggle-outset transition dark:bg-gray-600" />
-          <div className="absolute top-0 left-0 w-6 h-6 bg-white dark:bg-gray-300 rounded-full shadow-md transform transition duration-300 ease-in-out" />
-        </div>
-      </label>
+    <div className="flex items-center gap-2">
+      <Switch
+        checked={isDark}
+        onCheckedChange={toggleDarkMode}
+        className="bg-gray-900"
+      />
+      <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+        {isDark ? <Moon size={16} /> : <Sun size={16} />}
+      </span>
     </div>
   );
 }

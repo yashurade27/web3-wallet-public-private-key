@@ -10,7 +10,16 @@ import { ButtonEth, ButtonSol } from "./Button";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "./Heading";
 import InputBox from "./InputBox";
-import { ChevronDown, ChevronUp, Copy, Eye, EyeOff, Grid2X2, List, Trash} from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Eye,
+  EyeOff,
+  Grid2X2,
+  List,
+  Trash,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import {
   AlertDialog,
@@ -24,7 +33,7 @@ import {
   AlertDialogAction,
 } from "./ui/alert-dialog";
 
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
 window.Buffer = window.Buffer || Buffer;
 
 interface Wallet {
@@ -101,7 +110,6 @@ const GenerateWallet = () => {
     );
   };
 
-
   const generatWalletfromMnemonic = (
     pathType: string,
     mnemonic: string,
@@ -112,21 +120,21 @@ const GenerateWallet = () => {
       console.log("Creating seed buffer");
       const seedBuffer = mnemonicToSeedSync(mnemonic);
       console.log("Seed buffer created successfully", seedBuffer.length);
-  
+
       const path =
         pathType === "501"
-          ? `m/44'/${pathType}'/0'/${accountIndex}'` 
-          : `m/44'/${pathType}'/0'/${accountIndex}'`; 
-  
+          ? `m/44'/${pathType}'/0'/${accountIndex}'`
+          : `m/44'/${pathType}'/0'/${accountIndex}'`;
+
       console.log("Deriving path", path);
-  
+
       const derivedResult = derivePath(path, seedBuffer.toString("hex"));
       console.log("Path derived successfully");
       const { key: derivedSeed } = derivedResult;
-  
+
       let publicKeyEncoded;
       let privateKeyEncoded;
-  
+
       if (pathType === "501") {
         console.log("Generating Solana wallet");
         // Solana
@@ -134,27 +142,25 @@ const GenerateWallet = () => {
         console.log("Nacl keypair created");
         const keypair = Keypair.fromSecretKey(keypairData.secretKey);
         console.log("Solana keypair created");
-  
+
         privateKeyEncoded = bs58.encode(keypairData.secretKey);
         publicKeyEncoded = keypair.publicKey.toBase58();
         console.log("Solana keys encoded successfully");
-  
       } else if (pathType === "60") {
         console.log("Generating Ethereum wallet");
         // Ethereum
         const privateKey = Buffer.from(derivedSeed).toString("hex");
         privateKeyEncoded = privateKey;
-  
+
         const wallet = new ethers.Wallet(privateKey);
         publicKeyEncoded = wallet.address;
         console.log("Ethereum wallet created successfully");
-  
       } else {
         console.error("Unsupported path type", pathType);
         toast.error("Unsupported path type.");
         return null;
       }
-  
+
       console.log("Wallet generated successfully");
       return {
         publicKey: publicKeyEncoded,
@@ -168,18 +174,19 @@ const GenerateWallet = () => {
       return null;
     }
   };
-  
-
 
   const debugLog = (step: any, data: any) => {
     console.log(`DEBUG [${step}]:`, data);
   };
-  
+
   const handleGenerateWallets = () => {
     let mnemonic = mnemonicInput.trim();
-    
-    debugLog("Starting wallet generation", { mnemonic, pathType: pathTypes[0] });
-    
+
+    debugLog("Starting wallet generation", {
+      mnemonic,
+      pathType: pathTypes[0],
+    });
+
     try {
       // Generate mnemonic if needed
       if (!mnemonic) {
@@ -189,17 +196,22 @@ const GenerateWallet = () => {
           debugLog("Generated mnemonic", mnemonic);
         } catch (error) {
           console.error("Mnemonic generation error:", error);
-          toast.error("Failed to generate mnemonic: " + (error instanceof Error ? error.message : "Unknown error occurred"));
+          toast.error(
+            "Failed to generate mnemonic: " +
+              (error instanceof Error
+                ? error.message
+                : "Unknown error occurred")
+          );
           return;
         }
       } else if (!validateMnemonic(mnemonic)) {
         toast.error("Invalid mnemonic. Please enter a valid mnemonic.");
         return;
       }
-      
+
       const words = mnemonic.split(" ");
       debugLog("Mnemonic words", words);
-      
+
       // Create new wallet
       debugLog("Creating wallet with path", pathTypes[0]);
       try {
@@ -208,43 +220,53 @@ const GenerateWallet = () => {
           mnemonic,
           wallets.length
         );
-        
+
         debugLog("Wallet created", wallet ? "success" : "failed");
-        
+
         if (wallet) {
           // Create updated arrays first
           const updatedWallets = [...wallets, wallet];
           const updatedPathTypes = [...pathTypes];
           const updatedVisibleKeys = [...visiblePrivateKeys, false];
           const updatedVisiblePhrases = [...visiblePhrases, false];
-          
+
           // Update state
-          debugLog("Updating state", { wordCount: words.length, walletCount: updatedWallets.length });
+          debugLog("Updating state", {
+            wordCount: words.length,
+            walletCount: updatedWallets.length,
+          });
           setMnemonicWords(words);
           setWallets(updatedWallets);
           setVisiblePrivateKeys(updatedVisibleKeys);
           setVisiblePhrases(updatedVisiblePhrases);
-          
+
           // Update localStorage
           debugLog("Updating localStorage", null);
           localStorage.setItem("wallets", JSON.stringify(updatedWallets));
           localStorage.setItem("mnemonics", JSON.stringify(words));
           localStorage.setItem("paths", JSON.stringify(updatedPathTypes));
-          
+
           toast.success("Wallet generated successfully!");
         } else {
           toast.error("Failed to generate wallet. Please try again.");
         }
       } catch (error) {
         console.error("Wallet creation error:", error);
-        toast.error(`Error creating wallet: ${error instanceof Error ? error.message : "Unknown error occurred"}`);
+        toast.error(
+          `Error creating wallet: ${
+            error instanceof Error ? error.message : "Unknown error occurred"
+          }`
+        );
       }
     } catch (error) {
       console.error("Wallet generation failed:", error);
-      toast.error(`Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`);
+      toast.error(
+        `Error: ${
+          error instanceof Error ? error.message : "Unknown error occurred"
+        }`
+      );
     }
   };
-  
 
   const handleAddWallet = () => {
     if (!mnemonicWords || mnemonicWords.length === 0) {
@@ -301,7 +323,7 @@ const GenerateWallet = () => {
             </div>
           </motion.div>
         )}
-  
+
         {pathTypes.length !== 0 && (
           <motion.div
             key="show-recovery"
@@ -313,10 +335,10 @@ const GenerateWallet = () => {
           >
             <div className="flex flex-col gap-2">
               <h1 className="text-6xl font-black dark:text-white text-gray-800 flex flex-row gap-3">
-                <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">{pathTypeName}</div> 
-                <div>
-                Secret Recovery Phrase
+                <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                  {pathTypeName}
                 </div>
+                <div>Secret Recovery Phrase</div>
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Save this phrase in a safe place. It is the only way to recover
@@ -342,43 +364,37 @@ const GenerateWallet = () => {
             </div>
           </motion.div>
         )}
-  
-        {refresh && mnemonicWords && mnemonicWords.length > 0 && wallets.length > 0 &&(
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.3,
-              ease: "easeInOut",
-            }}
-            className="group flex flex-col items-center gap-4 cursor-pointer rounded-lg border border-primary/10 p-8 max-w-4xl mx-auto"
-          >
-            <div className="flex w-full justify-between items-center gap-6">
-              <h2 className="text-3xl md:text-3xl font-bold tracking-lighter">
-                Your Secret Phrase
-              </h2>
-              <button 
-                className="text-gray-400 hover:text-gray-700 transition-colors duration-200"
-                onClick={() => setShowMnemonic(!showMnemonic)}
-              >
-                {showMnemonic ? (
-                  <ChevronUp className="size-8" />
-                ) : (
-                  <ChevronDown className="size-8" />
-                )}
-              </button>
-            </div>
-            
-            {showMnemonic && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.3,
-                  ease: "easeInOut",
-                }}
-                className="flex flex-col w-full items-center justify-center"
-              >
+
+        {refresh &&
+          mnemonicWords &&
+          mnemonicWords.length > 0 &&
+          wallets.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut",
+              }}
+              className="group flex flex-col items-center gap-4 cursor-pointer rounded-lg border border-primary/10 p-8 max-w-4xl mx-auto"
+            >
+              <div className="flex w-full justify-between items-center gap-6">
+                <h2 className="text-3xl md:text-3xl font-bold tracking-lighter">
+                  Your Secret Phrase
+                </h2>
+                <button
+                  className="text-gray-400 hover:text-gray-700 transition-colors duration-200"
+                  onClick={() => setShowMnemonic(!showMnemonic)}
+                >
+                  {showMnemonic ? (
+                    <ChevronUp className="size-8" />
+                  ) : (
+                    <ChevronDown className="size-8" />
+                  )}
+                </button>
+              </div>
+
+              {showMnemonic && (
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -386,30 +402,39 @@ const GenerateWallet = () => {
                     duration: 0.3,
                     ease: "easeInOut",
                   }}
-                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 justify-center w-full items-center mx-auto my-8"
+                  className="flex flex-col w-full items-center justify-center"
                 >
-                  {mnemonicWords.map((word, index) => (
-                    <p
-                      key={index}
-                      className="md:text-lg bg-foreground/5 hover:bg-foreground/10 transition-all duration-300 rounded-lg p-4"
-                    >
-                      {word}
-                    </p>
-                  ))}
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeInOut",
+                    }}
+                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 justify-center w-full items-center mx-auto my-8"
+                  >
+                    {mnemonicWords.map((word, index) => (
+                      <p
+                        key={index}
+                        className="md:text-lg bg-foreground/5 hover:bg-foreground/10 transition-all duration-300 rounded-lg p-4"
+                      >
+                        {word}
+                      </p>
+                    ))}
+                  </motion.div>
+                  <div
+                    className="text-sm md:text-base text-primary/50 flex w-full gap-2 items-center group-hover:text-primary/80 transition-all duration-300 cursor-pointer"
+                    onClick={() => copyToClipboard(mnemonicWords.join(" "))}
+                  >
+                    <Copy className="size-4" /> Click Here To Copy
+                  </div>
                 </motion.div>
-                <div 
-                  className="text-sm md:text-base text-primary/50 flex w-full gap-2 items-center group-hover:text-primary/80 transition-all duration-300 cursor-pointer"
-                  onClick={() => copyToClipboard(mnemonicWords.join(" "))}
-                >
-                  <Copy className="size-4" /> Click Here To Copy
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-        
+              )}
+            </motion.div>
+          )}
+
         {wallets.length > 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -445,8 +470,8 @@ const GenerateWallet = () => {
                         Are you sure you want to delete all wallets?
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete
-                        your wallets and keys from local storage.
+                        This action cannot be undone. This will permanently
+                        delete your wallets and keys from local storage.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -462,7 +487,9 @@ const GenerateWallet = () => {
             <div>
               <div
                 className={`grid gap-6 ${
-                  gridView ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
+                  gridView
+                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                    : "grid-cols-1"
                 }`}
               >
                 {wallets.map((wallet: any, index: number) => (
@@ -496,8 +523,9 @@ const GenerateWallet = () => {
                               Are you sure you want to delete this wallet?
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently
-                              delete your wallet and keys from local storage.
+                              This action cannot be undone. This will
+                              permanently delete your wallet and keys from local
+                              storage.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -535,7 +563,8 @@ const GenerateWallet = () => {
                           >
                             {visiblePrivateKeys[index]
                               ? wallet.privateKey
-                              : "•".repeat(wallet.privateKey.length)} {/* Changed from wallet.mnemonic.length to wallet.privateKey.length */}
+                              : "•".repeat(wallet.privateKey.length)}{" "}
+                            {/* Changed from wallet.mnemonic.length to wallet.privateKey.length */}
                           </p>
                           <Button
                             variant="ghost"
