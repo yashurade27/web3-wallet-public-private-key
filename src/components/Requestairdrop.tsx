@@ -29,7 +29,7 @@ export default function Requestairdrop() {
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="items-center justify-center">
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={[]} autoConnect>
         <WalletModalProvider>
