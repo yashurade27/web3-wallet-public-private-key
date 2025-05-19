@@ -123,6 +123,7 @@ export function Toggle({
       />
       <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
         {isDark ? <Moon size={16} /> : <Sun size={16} />}
+        {modeLabel}
       </span>
     </div>
   );
